@@ -1,0 +1,25 @@
+pipeline {
+  agent any
+  tools {
+    maven "M3"
+    jdk "jdk1.8"
+  }
+  stages {
+    stage("Initialize") {
+      steps {
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'GitHub', url: 'https://github.com/AkiraGoto/jenkins-demo.git']]])
+      }
+    }
+    
+    stage ('Build') {
+      steps {
+        sh 'mvn -Dmaven.test.failure.ignore=true package' 
+      }
+      post {
+         success {
+             junit 'target/surefire-reports/**/*.xml' 
+         }
+       }
+     }
+  }
+}
